@@ -5,14 +5,37 @@ const { exec } = require("child_process");
 const { getPassivedata } = require("./controller/passiveData");
 const { writeFile } = require("./controller/func/writeToFile");
 const getMidData = require("./controller/midData");
-const { getActiveData, oldData } = require("./controller/activeData");
+const { getActiveData } = require("./controller/activeData");
 const buffer = require("./fileResp/Buffer");
 const { getNetwork } = require("./controller/devInf/floodPing");
 const Arp = require("./controller/devInf/getArp");
 
-const getLocalDevices = require("./controller/devInf/localDevices");
+///////////=================================== WEB
 
-//const getSocket = require("./controller/func/getSocket");
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const app = express();
+const path = require("path");
+
+app.use(bodyParser());
+app.use(cors());
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
+app.get("/", function (req, res) {
+  let activeData = buffer.getActive();
+  let activeMid = buffer.getMid();
+  let passiveData = buffer.getPassive();
+
+  res.render("index", { foo: JSON.stringify(activeData) });
+});
+
+app.listen(57071, function () {
+  console.log("Web started on 57071");
+});
+
+///////////===========================================
 
 dotenv.config({ path: "./config/config.env" });
 
@@ -41,7 +64,7 @@ const options = {
 
 getNetwork();
 Arp.getArp().then((data) => {
-  buffer.setArp(data);
+  //buffer.setArp(data);
 });
 
 getConnected();
@@ -87,14 +110,13 @@ function getConnected() {
     setInterval(sendPassiveData, checkPassive_Interval);
   }
 
-  function sendArp() {}
-
   function sendActiveData() {
     console.log(
       (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + "MB"
     );
     getActiveData().then((data) => {
       buffer.setActive(data);
+      // console.log(buffer.getActive());
       client.write(
         JSON.stringify({
           type: "DATA_ACTIVE",
@@ -102,6 +124,7 @@ function getConnected() {
           data: data,
         })
       );
+
       writeFile({
         type: "DATA_ACTIVE",
         data: data,
@@ -120,7 +143,6 @@ function getConnected() {
           data: data,
         })
       );
-      buffer.setMid(data);
 
       writeFile({
         type: "DATA_MID",
@@ -139,7 +161,7 @@ function getConnected() {
           data: data,
         })
       );
-      buffer.setPassive(data);
+
       writeFile({
         type: "DATA_PASSIVE",
         data: data,
@@ -193,6 +215,7 @@ function onData(d) {
     }
   }
 }
+
 /*
 app.get("/", async function (require, response) {
   getPassivedata().then((d) => {
