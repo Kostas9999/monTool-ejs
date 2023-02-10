@@ -5,7 +5,7 @@ const fs = require("fs");
 
 async function writeFile(data) {
   let path = `./fileResp/${data.type}.json`;
-
+  /*
   try {
     fs.writeFile(path, JSON.stringify(data), { flag: "w+" }, (err) => {
       if (err) {
@@ -16,6 +16,7 @@ async function writeFile(data) {
   } catch (err) {
     console.error(err);
   }
+  */
 }
 
 module.exports = { writeFile };

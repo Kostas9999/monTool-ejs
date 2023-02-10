@@ -1,5 +1,4 @@
-const e = require("express");
-const { exec, spawn } = require("node:child_process");
+const { exec } = require("node:child_process");
 const si = require("systeminformation");
 const { writeFile } = require("../func/writeToFile");
 
@@ -45,18 +44,12 @@ async function getNetwork() {
           });
         }
       });
-      // console.log(arpEntries);
 
       writeFile({
         type: "DATA_ARP",
         data: arpEntries,
         time: new Date(),
       }); // write data to file
-
-      /*
-   
-    });
-  */
     });
   });
 }

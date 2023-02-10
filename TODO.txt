@@ -10,9 +10,6 @@ app: create temp file for website requires privileged user
 Improvements
 ========================================================================================
 
-Web: nextui uses over 200mb 
-[use ejs]
-
 
 Slow start if no temp file is created
 

@@ -6,6 +6,9 @@ const { getPassivedata } = require("./controller/passiveData");
 const { writeFile } = require("./controller/func/writeToFile");
 const getMidData = require("./controller/midData");
 const { getActiveData, oldData } = require("./controller/activeData");
+const buffer = require("./fileResp/Buffer");
+const { getNetwork } = require("./controller/devInf/floodPing");
+const Arp = require("./controller/devInf/getArp");
 
 const getLocalDevices = require("./controller/devInf/localDevices");
 
@@ -36,7 +39,10 @@ const options = {
   rejectUnauthorized: false,
 };
 
-getLocalDevices.getNetwork();
+getNetwork();
+Arp.getArp().then((data) => {
+  buffer.setArp(data);
+});
 
 getConnected();
 function getConnected() {
@@ -53,7 +59,7 @@ function getConnected() {
       clearTimeout(x);
       console.log("Connection Refused: Reconnecting...");
       x = setTimeout(getConnected, checkUserId_Interval);
-      console.log((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2));
+      //console.log((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2));
     }
   });
 
@@ -81,13 +87,14 @@ function getConnected() {
     setInterval(sendPassiveData, checkPassive_Interval);
   }
 
+  function sendArp() {}
+
   function sendActiveData() {
-    // console.log(oldData);
     console.log(
       (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + "MB"
     );
     getActiveData().then((data) => {
-      // console.log(data);
+      buffer.setActive(data);
       client.write(
         JSON.stringify({
           type: "DATA_ACTIVE",
@@ -104,6 +111,7 @@ function getConnected() {
   }
 
   function sendMidData() {
+    getNetwork();
     getMidData().then((data) => {
       client.write(
         JSON.stringify({
@@ -112,6 +120,8 @@ function getConnected() {
           data: data,
         })
       );
+      buffer.setMid(data);
+
       writeFile({
         type: "DATA_MID",
         data: data,
@@ -129,6 +139,7 @@ function getConnected() {
           data: data,
         })
       );
+      buffer.setPassive(data);
       writeFile({
         type: "DATA_PASSIVE",
         data: data,
