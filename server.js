@@ -10,6 +10,10 @@ const buffer = require("./fileResp/Buffer");
 const { getNetwork } = require("./controller/devInf/floodPing");
 const Arp = require("./controller/devInf/getArp");
 
+let buff = buffer.buffer;
+
+module.exports = { buff };
+
 ///////////=================================== WEB
 
 const express = require("express");
@@ -25,17 +29,16 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
-  console.log("Here");
-  let UID = buffer.getUID();
-  let aData = buffer.getActive();
-  let mData = buffer.getMid();
-  let pData = buffer.getPassive();
-  let arpData = buffer.getArp();
+  let UID = buffer.buffer.getUID();
+  let aData = buffer.buffer.getActive();
+  let mData = buffer.buffer.getMid();
+  let pData = buffer.buffer.getPassive();
+  let arpData = buffer.buffer.getArp();
 
   res.render("index", { UID, aData, mData, pData, arpData });
 });
 
-app.listen(3000, function () {
+app.listen(3001, function () {
   console.log("Web started on 3000");
 });
 
@@ -70,7 +73,7 @@ getConnected();
 async function getConnected() {
   client = tls.connect(options, async () => {
     await getUID();
-    buffer.setUID(my_UID);
+    buffer.buffer.setUID(my_UID);
 
     client.setEncoding("utf8");
     client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
@@ -114,8 +117,9 @@ async function getConnected() {
     console.log(
       (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + "MB"
     );
+
     getActiveData().then((data) => {
-      buffer.setActive(data);
+      buffer.buffer.setActive(data);
       // console.log(buffer.getActive());
       client.write(
         JSON.stringify({
@@ -136,7 +140,7 @@ async function getConnected() {
   function sendMidData() {
     getNetwork();
     getMidData().then((data) => {
-      buffer.setMid(data);
+      buffer.buffer.setMid(data);
       client.write(
         JSON.stringify({
           type: "DATA_MID",
@@ -155,7 +159,7 @@ async function getConnected() {
 
   function sendPassiveData() {
     getPassivedata().then((data) => {
-      buffer.setPassive(data);
+      buffer.buffer.setPassive(data);
       client.write(
         JSON.stringify({
           type: "DATA_PASSIVE",
@@ -197,7 +201,7 @@ async function getConnected() {
 
 getNetwork();
 Arp.getArp().then((data) => {
-  buffer.setArp(data);
+  buffer.buffer.setArp(data);
 });
 
 function onData(d) {
