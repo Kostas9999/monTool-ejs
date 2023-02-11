@@ -23,47 +23,47 @@
         <div class="d-flex ">
 
             <div class="mx-2">
-                <h6> HostName: <%= passiveData.os.hostname  %>  </h6>
-                <h6> Version: <%= passiveData.os.version %> </h6
-                <h6> Version: <%= passiveData.os.relese   %>  (<%=  passiveData.os.build%>)</h6>
+                <h6> HostName: <%= JSON.stringify( pData.os.hostname)  %>  </h6>
+                <h6> Version: <%= pData.os.version %> </h6
+                <h6> Version: <%= pData.os.relese   %>  (<%=  pData.os.build%>)</h6>
             </div>
                                         
             <div class="mx-2">
-                <h6> CPU: <%= passiveData.hardware.Title  %></h6>
+                <h6> CPU: <%= pData.hardware.Title  %></h6>
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="99" aria-valuemin="0" aria-valuemax="100"></div>        
                     </div>
 
-                <h6> RAM: <%= passiveData.hardware.TotalMemory  %></h6>
+                <h6> RAM: <%= pData.hardware.TotalMemory  %></h6>
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow=<%= activeData.cpu %> aria-valuemin="0" aria-valuemax="100"></div>        
+                        <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>        
                     </div> 
             </div>  
                                                             
             <div class="mx-2">                                              
 
-                <h6> Interface: <%= passiveData.networkinterface.iface  %> (<%= passiveData.networkinterface.speed %>  mb/s)  </h6>
-                <h6> MAC: <%= passiveData.networkinterface.mac %> </h6>
-                <h6> IPv4: <%= passiveData.networkinterface.IPv4 %> </h6>                
-                <h6> IPv4 Mask: <%= passiveData.networkinterface.IPv4Sub %> </h6>
-                <h6> IPv6: <%= passiveData.networkinterface.IPv6 %> </h6>                
-                <h6> IPv6 Mask: <%= passiveData.networkinterface.IPv6Sub %> </h6>
+                <h6> Interface: <%= pData.networkinterface.iface  %> (<%= pData.networkinterface.speed %>  mb/s)  </h6>
+                <h6> MAC: <%= pData.networkinterface.mac %> </h6>
+                <h6> IPv4: <%= pData.networkinterface.IPv4 %> </h6>                
+                <h6> IPv4 Mask: <%= pData.networkinterface.IPv4Sub %> </h6>
+                <h6> IPv6: <%= pData.networkinterface.IPv6 %> </h6>                
+                <h6> IPv6 Mask: <%= pData.networkinterface.IPv6Sub %> </h6>
             </div> 
 
             <div class="mx-2">
-                <h6> rx_total: <%= activeData.networkStats.rx_total  %> </h6>
-                <h6> rx_dropped: <%= activeData.networkStats.rx_dropped  %> </h6>
-                <h6> rx_error: <%= activeData.networkStats.rx_error  %> </h6>
-                <h6> tx_total: <%= activeData.networkStats.tx_total  %> </h6>
-                <h6> tx_dropped: <%= activeData.networkStats.tx_dropped  %> </h6>
-                <h6> tx_error: <%= activeData.networkStats.tx_error  %> </h6>
+                <h6> rx_total: <%= aData.networkStats.rx_total  %> </h6>
+                <h6> rx_dropped: <%= aData.networkStats.rx_dropped  %> </h6>
+                <h6> rx_error: <%= aData.networkStats.rx_error  %> </h6>
+                <h6> tx_total: <%= aData.networkStats.tx_total  %> </h6>
+                <h6> tx_dropped: <%= aData.networkStats.tx_dropped  %> </h6>
+                <h6> tx_error: <%= aData.networkStats.tx_error  %> </h6>
             </div>
 
             <div>
-                <h6> localLatency: <%= activeData.networkStats.localLatency  %> ms</h6>
-                <h6> publicLatency: <%= activeData.networkStats.publicLatency  %> ms </h6>
-                <h6> defaultGateway: <%= activeData.networkStats.defaultGateway  %> </h6>
-                <h6> defaultGateway MAC: <%= activeData.networkStats.dgMAC  %> </h6>
+                <h6> localLatency: <%= aData.networkStats.localLatency  %> ms</h6>
+                <h6> publicLatency: <%= aData.networkStats.publicLatency  %> ms </h6>
+                <h6> defaultGateway: <%= aData.networkStats.defaultGateway  %> </h6>
+                <h6> defaultGateway MAC: <%= aData.networkStats.dgMAC  %> </h6>
 
             </div>
 
@@ -88,10 +88,10 @@
 <div >
  
         <ul>
-            <% for(disc of midData.disc){ %>
+            <% for(disc of mData.disc){ %>
                 <li> <%=disc.fs %>  <%=disc.size %></li>
                 <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow=<%= activeData.cpu %> aria-valuemin="0" aria-valuemax="100"></div>        
+                    <div class="progress-bar" role="progressbar" style="width: 50%"  aria-valuemin="0" aria-valuemax="100" aria-valuenow="30"></div>        
                 </div> 
 
                 <% } %>
@@ -137,7 +137,7 @@
     
     <div>
         <ul>
-            <% for(port of midData.ports){ %>
+            <% for(port of mData.ports){ %>
                 <li> <%=port.port %>  <%=port.processName %>  <%=port.PID %> <%=port.processPath %></li>
                
     

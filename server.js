@@ -25,17 +25,18 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
+  console.log("Here");
   let UID = buffer.getUID();
-  let activeData = buffer.getActive();
-  let midData = buffer.getMid();
-  let passiveData = buffer.getPassive();
+  let aData = buffer.getActive();
+  let mData = buffer.getMid();
+  let pData = buffer.getPassive();
   let arpData = buffer.getArp();
 
-  res.render("index", { UID, activeData, midData, passiveData, arpData });
+  res.render("index", { UID, aData, mData, pData, arpData });
 });
 
 app.listen(3000, function () {
-  console.log("Web started on 57071");
+  console.log("Web started on 3000");
 });
 
 ///////////===========================================
@@ -66,7 +67,7 @@ const options = {
 };
 
 getConnected();
-function getConnected() {
+async function getConnected() {
   client = tls.connect(options, async () => {
     await getUID();
     buffer.setUID(my_UID);

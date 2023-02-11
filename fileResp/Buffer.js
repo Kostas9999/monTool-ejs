@@ -1,3 +1,6 @@
+class buffer {
+  static data;
+}
 let DATA_ACTIVE;
 let DATA_ARP;
 let DATA_MID;
@@ -53,4 +56,5 @@ module.exports = {
   setArp,
   setMid,
   setPassive,
+  buffer,
 };
