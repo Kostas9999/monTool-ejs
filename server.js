@@ -17,6 +17,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
 const path = require("path");
+const midData = require("./controller/midData");
 
 app.use(bodyParser());
 app.use(cors());
@@ -24,14 +25,16 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
+  let UID = buffer.getUID();
   let activeData = buffer.getActive();
-  let activeMid = buffer.getMid();
+  let midData = buffer.getMid();
   let passiveData = buffer.getPassive();
+  let arpData = buffer.getArp();
 
-  res.render("index", { foo: JSON.stringify(activeData) });
+  res.render("index", { UID, activeData, midData, passiveData, arpData });
 });
 
-app.listen(57071, function () {
+app.listen(3000, function () {
   console.log("Web started on 57071");
 });
 
@@ -62,15 +65,11 @@ const options = {
   rejectUnauthorized: false,
 };
 
-getNetwork();
-Arp.getArp().then((data) => {
-  //buffer.setArp(data);
-});
-
 getConnected();
 function getConnected() {
   client = tls.connect(options, async () => {
     await getUID();
+    buffer.setUID(my_UID);
 
     client.setEncoding("utf8");
     client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
@@ -136,6 +135,7 @@ function getConnected() {
   function sendMidData() {
     getNetwork();
     getMidData().then((data) => {
+      buffer.setMid(data);
       client.write(
         JSON.stringify({
           type: "DATA_MID",
@@ -154,6 +154,7 @@ function getConnected() {
 
   function sendPassiveData() {
     getPassivedata().then((data) => {
+      buffer.setPassive(data);
       client.write(
         JSON.stringify({
           type: "DATA_PASSIVE",
@@ -187,11 +188,16 @@ function getConnected() {
     }
 
     if (e.code == "ECONNREFUSED") {
-      //  console.log("Connection Refused\nReconnecting...");
-      //   setTimeout(getConnected, 5000);
+      console.log("Connection Refused\nReconnecting...");
+      setTimeout(getConnected, 5000);
     }
   });
 }
+
+getNetwork();
+Arp.getArp().then((data) => {
+  buffer.setArp(data);
+});
 
 function onData(d) {
   data = JSON.parse(d);
@@ -208,27 +214,13 @@ function onData(d) {
     } else if (data.data.type == "EXEC") {
       console.log("EXEC " + data.data.msg);
 
-      exec(data.data.msg, function (err, stdout, stderr) {
-        // direct execution
-        client.write(JSON.stringify({ type: "MSG", data: stdout }));
-      });
+      //  exec(data.data.msg, function (err, stdout, stderr) {
+      // direct execution
+      //   client.write(JSON.stringify({ type: "MSG", data: stdout }));
+      //});
     }
   }
 }
-
-/*
-app.get("/", async function (require, response) {
-  getPassivedata().then((d) => {
-    response.render("index", {
-      foo: JSON.stringify(d.hardware.HWUUID),
-    });
-  });
-});
-
-app.listen(8000, function () {
-  console.log("Listen on 8000");
-});
-*/
 
 /*
 Traffic: Monitor the amount of data being transferred across the network, including both inbound and outbound traffic. This can help identify potential bottlenecks or connectivity issues.

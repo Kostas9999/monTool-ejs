@@ -2,6 +2,15 @@ let DATA_ACTIVE;
 let DATA_ARP;
 let DATA_MID;
 let DATA_PASSIVE;
+let UID;
+
+function getUID() {
+  return UID;
+}
+
+function setUID(data) {
+  UID = data;
+}
 
 function setActive(data) {
   DATA_ACTIVE = data;
@@ -34,10 +43,12 @@ function getPassive() {
 }
 
 module.exports = {
+  getUID,
   getActive,
   getArp,
   getMid,
   getPassive,
+  setUID,
   setActive,
   setArp,
   setMid,
