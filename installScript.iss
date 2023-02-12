@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "monTool"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.1.1"
 #define MyAppPublisher "B00148740"
 #define MyAppURL "monTool.vercel.app"
 #define NSSM "/nssm/win32/nssm.exe"
@@ -26,10 +26,11 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\My\Desktop\monTool-SetupFiles
-OutputBaseFilename=mysetup3
+OutputBaseFilename=mysetup4
 Compression=lzma
 SolidCompression=yes
-;WizardStyle=modern
+SetupIconFile=ico.ico  
+WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
