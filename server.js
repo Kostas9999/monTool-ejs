@@ -38,9 +38,9 @@ let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
 const options = {
-  host: "185.38.61.93",
+  //host: "185.38.61.93",
   //servername: "localhost",
-  //host: "127.0.0.1",
+  host: "127.0.0.1",
   port: 57070,
 
   //ca: fs.readFileSync("./cert/ca.pem"),
@@ -57,10 +57,6 @@ getNetwork(); //  check neighbords by ping "broadcast"
 
 getConnected();
 async function getConnected() {
-  checkPassive_Interval = 1800000;
-  checkMid_Interval = 60000;
-  checkActive_Interval = 5000;
-
   client = null;
   client = tls.connect(options, async () => {
     // get machine ID to inform server who are connecting to

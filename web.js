@@ -22,11 +22,11 @@ app.get("/", function (req, res) {
   if (!UID || !aData || !mData || !pData) {
     // console.log(mData);
     res.render("preparing");
+  } else {
+    res.render("index", { UID, aData, mData, pData });
   }
-
-  res.render("index", { UID, aData, mData, pData });
 });
 
-app.listen(57071, function () {
+app.listen(3000, function () {
   console.log("Web started on 57071");
 });
