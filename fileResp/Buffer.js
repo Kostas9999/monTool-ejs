@@ -12,7 +12,7 @@ function getActive() {
 }
 
 function getUID() {
-  return this.UID;
+  return UID;
 }
 
 function setUID(data) {

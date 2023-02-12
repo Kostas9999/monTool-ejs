@@ -1,7 +1,7 @@
 const { exec, execSync } = require("node:child_process");
 const si = require("systeminformation");
 
-async function getArp() {
+module.exports = async function getArp() {
   let network;
   await si.networkInterfaces((i) => {
     for (const s of i) {
@@ -46,6 +46,4 @@ async function getArp() {
   });
 
   return temp;
-}
-
-module.exports = { getArp };
+};

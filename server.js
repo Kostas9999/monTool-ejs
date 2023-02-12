@@ -1,14 +1,16 @@
 const tls = require("tls");
 const fs = require("fs");
 const dotenv = require("dotenv");
-const { exec } = require("child_process");
+
 const { getPassivedata } = require("./controller/passiveData");
-const { writeFile } = require("./controller/func/writeToFile");
 const { getMidData } = require("./controller/midData");
 const { getActiveData } = require("./controller/activeData");
-const buffer = require("./fileResp/Buffer");
 const { getNetwork } = require("./controller/devInf/floodPing");
+
+const buffer = require("./fileResp/Buffer");
 const Arp = require("./controller/devInf/getArp");
+
+const { processMSG } = require("./controller/func/processMessage");
 
 ///////////=================================== WEB
 
@@ -30,6 +32,7 @@ let checkActive_Interval = 5000;
 
 let checkUserId_Interval = 10000;
 
+// ===========================================  connection settings
 const options = {
   host: "185.38.61.93",
   //servername: "localhost",
@@ -43,173 +46,137 @@ const options = {
   rejectUnauthorized: false,
 };
 
+// ===========================  connection settings end
+
+//============================================== get connected to a server
+getNetwork(); //  check neighbords by ping "broadcast"
+
 getConnected();
 async function getConnected() {
+  client = null;
   client = tls.connect(options, async () => {
+    // get machine ID to inform server who are connecting to
     await getUID();
     buffer.setUID(my_UID);
 
+    // set encoding and send hello message on succesfull connection
     client.setEncoding("utf8");
     client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
-  });
-
-  client.on("error", (e) => {
-    if (e.code == "ECONNREFUSED") {
-      let x;
-      clearTimeout(x);
-      console.log("Connection Refused: Reconnecting...");
-      x = setTimeout(getConnected, checkUserId_Interval);
-      //console.log((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2));
-    }
-  });
+  }); //=============== end of tls.connect
 
   client.on("data", (data) => {
-    onData(data);
-  });
-
-  async function getUID() {
-    console.log("Getting Device ID...");
-
-    my_UID = (await getPassivedata()).hardware.HWUUID;
-    if (typeof my_UID !== "undefined") {
-      console.log(`ID: ${my_UID}`);
-
-      sendPassiveData();
-      sendData();
-    } else {
-      setTimeout(getUID, checkUserId_Interval);
-    }
-  }
-
-  function sendData() {
-    setInterval(sendActiveData, checkActive_Interval);
-    setInterval(sendMidData, checkMid_Interval);
-    setInterval(sendPassiveData, checkPassive_Interval);
-  }
-
-  function sendActiveData() {
-    getActiveData().then((data) => {
-      buffer.setActive(data);
-      client.write(
-        JSON.stringify({
-          type: "DATA_ACTIVE",
-          UID: my_UID,
-          data: data,
-        })
-      );
-
-      writeFile({
-        type: "DATA_ACTIVE",
-        data: data,
-        time: new Date(),
-      }); // write data to file
-    });
-  }
-
-  function sendMidData() {
-    getNetwork();
-    getMidData().then((data) => {
-      buffer.setMid(data);
-      client.write(
-        JSON.stringify({
-          type: "DATA_MID",
-          UID: my_UID,
-          data: data,
-        })
-      );
-
-      writeFile({
-        type: "DATA_MID",
-        data: data,
-        time: new Date(),
-      }); // write data to file
-    });
-  }
-
-  function sendPassiveData() {
-    getPassivedata().then((data) => {
-      buffer.setPassive(data);
-      client.write(
-        JSON.stringify({
-          type: "DATA_PASSIVE",
-          UID: my_UID,
-          data: data,
-        })
-      );
-
-      writeFile({
-        type: "DATA_PASSIVE",
-        data: data,
-        time: new Date(),
-      }); // write data to file
-    });
-  }
-
-  //client.on("data", (d) => {
-  // onData(d);
-  //});
-
-  client.on("end", () => {
-    console.log("client disconnected");
+    processMSG(data);
   });
 
   client.on("error", (e) => {
-    console.log("Error - " + e);
-
-    if (e.code == "ECONNRESET") {
-      console.log("Server down");
-      setTimeout(getConnected, 5000);
-    }
-
-    if (e.code == "ECONNREFUSED") {
-      console.log("Connection Refused\nReconnecting...");
-      setTimeout(getConnected, 5000);
-    }
+    onERORR(e);
   });
 }
 
-getNetwork();
-Arp.getArp().then((data) => {
-  buffer.setArp(data);
-});
+//============================================================
+//==================== Hnadle connection errors ==============
 
-function onData(d) {
-  data = JSON.parse(d);
+function onERORR(e) {
+  console.log(e);
+  let t;
+  clearTimeout(t);
+  if (e.code == "ECONNRESET") {
+    console.log("Disconnected from a server");
+  } else if (e.code == "ECONNREFUSED") {
+    console.log("Connection Refused\nReconnecting...");
+  } else if (e.code == "ETIMEDOUT") {
+    console.log("Connection Timed out\nServer Down\nReconnecting...");
+  } else {
+    console.log("Unhandled Error - " + e);
+  }
+  t = setTimeout(getConnected, checkUserId_Interval);
+}
 
-  //sort data received from server
+//============================================================
+//====================== Send Data ===========================
 
-  if (data.type == "MSG") {
-    console.log(data.data);
-  } else if (data.type == "POSTBOX") {
-    //console.log("Post: " + data.data.type + "   " + data.data.msg);
+function sendData() {
+  setInterval(sendActiveData, checkActive_Interval);
+  setInterval(sendMidData, checkMid_Interval);
+  setInterval(sendPassiveData, checkPassive_Interval);
+}
 
-    if (data.data.type == "GET") {
-      console.log("GET " + data.data.msg);
-    } else if (data.data.type == "EXEC") {
-      console.log("EXEC " + data.data.msg);
+function sendActiveData() {
+  getActiveData().then((data) => {
+    buffer.setActive(data);
+    client.write(
+      JSON.stringify({
+        type: "DATA_ACTIVE",
+        UID: my_UID,
+        data: data,
+      })
+    );
+  });
+}
 
-      //  exec(data.data.msg, function (err, stdout, stderr) {
-      // direct execution
-      //   client.write(JSON.stringify({ type: "MSG", data: stdout }));
-      //});
-    }
+function sendMidData() {
+  getNetwork();
+  getMidData().then((data) => {
+    buffer.setMid(data);
+    client.write(
+      JSON.stringify({
+        type: "DATA_MID",
+        UID: my_UID,
+        data: data,
+      })
+    );
+  });
+}
+
+function sendPassiveData() {
+  getPassivedata().then((data) => {
+    buffer.setPassive(data);
+    client.write(
+      JSON.stringify({
+        type: "DATA_PASSIVE",
+        UID: my_UID,
+        data: data,
+      })
+    );
+  });
+}
+
+//============================================================
+//===================== get User ID ==========================
+
+async function getUID() {
+  console.log("Getting Device ID...");
+
+  my_UID = (await getPassivedata()).hardware.HWUUID;
+  if (typeof my_UID !== "undefined") {
+    console.log(`ID: ${my_UID}`);
+    sendPassiveData();
+    sendData();
+  } else {
+    setTimeout(getUID, checkUserId_Interval);
   }
 }
 
 /*
-Traffic: Monitor the amount of data being transferred across the network, including both inbound and outbound traffic. This can help identify potential bottlenecks or connectivity issues.
+Arp.getArp().then((data) => {
+  buffer.setArp(data);
+});
+*/
 
-Bandwidth: Monitor the available bandwidth on the network, and track how much of it is being utilized at any given time. This can help identify situations where the network is becoming overloaded.
+/*
+Traffic: Monitor the amount of data being transferred This can help identify potential bottlenecks or connectivity issues.
+
+Bandwidth: Monitor the available bandwidth  - network is becoming overloaded.?
 
 Latency: Monitor the amount of time it takes for data to travel across the network, also known as "ping" time. High latency can indicate a problem with the network or a specific connection.
 
-Packet loss: Monitor the number of packets that are being lost or dropped during transmission. This can be an indication of a problem with the network or a specific device.
+Packet loss: - This can be an indication of a problem with the network or a specific device.
 
 Availability: Monitor the availability of network devices and services. This can include devices like routers, switches, and servers, as well as services like DNS or DHCP.
 
 Security: Monitor network security-related events, such as attempted unauthorized access or suspicious traffic patterns.
 
-CPU, Memory, Disk usage: Monitor the usage of these resources on the devices connected to the network, it can indicate if a device is overloaded and need to be replaced or upgraded.
+CPU, Memory, Disk usage: Monitor the usage - a device is overloaded and need to be replaced or upgraded.
 
 
 */
