@@ -1,4 +1,5 @@
-const { buff } = require("./data");
+const server = require("./server");
+const buff = require("./fileResp/Buffer");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -18,9 +19,14 @@ app.get("/", function (req, res) {
   let pData = buff.getPassive();
   let arpData = buff.getArp();
 
+  if (!UID || !aData || !mData || !pData || !arpData) {
+    console.log("here");
+    res.render("preparing");
+  }
+
   res.render("index", { UID, aData, mData, pData, arpData });
 });
 
-app.listen(3000, function () {
-  console.log("Web started on 3000");
+app.listen(57071, function () {
+  console.log("Web started on 57071");
 });

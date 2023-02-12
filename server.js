@@ -4,43 +4,17 @@ const dotenv = require("dotenv");
 const { exec } = require("child_process");
 const { getPassivedata } = require("./controller/passiveData");
 const { writeFile } = require("./controller/func/writeToFile");
-const getMidData = require("./controller/midData");
+const { getMidData } = require("./controller/midData");
 const { getActiveData } = require("./controller/activeData");
 const buffer = require("./fileResp/Buffer");
 const { getNetwork } = require("./controller/devInf/floodPing");
 const Arp = require("./controller/devInf/getArp");
 
-let buff = buffer.buffer;
-
-module.exports = { buff };
-
 ///////////=================================== WEB
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const app = express();
-const path = require("path");
-const midData = require("./controller/midData");
-
-app.use(bodyParser());
-app.use(cors());
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
-
-app.get("/", function (req, res) {
-  let UID = buffer.buffer.getUID();
-  let aData = buffer.buffer.getActive();
-  let mData = buffer.buffer.getMid();
-  let pData = buffer.buffer.getPassive();
-  let arpData = buffer.buffer.getArp();
-
-  res.render("index", { UID, aData, mData, pData, arpData });
-});
-
-app.listen(3001, function () {
-  console.log("Web started on 3000");
-});
+getActiveData().then((data) => buffer.setActive(data));
+getMidData().then((data) => buffer.setMid(data));
+getPassivedata().then((data) => buffer.setPassive(data));
 
 ///////////===========================================
 
@@ -73,7 +47,7 @@ getConnected();
 async function getConnected() {
   client = tls.connect(options, async () => {
     await getUID();
-    buffer.buffer.setUID(my_UID);
+    buffer.setUID(my_UID);
 
     client.setEncoding("utf8");
     client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
@@ -114,13 +88,8 @@ async function getConnected() {
   }
 
   function sendActiveData() {
-    console.log(
-      (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + "MB"
-    );
-
     getActiveData().then((data) => {
-      buffer.buffer.setActive(data);
-      // console.log(buffer.getActive());
+      buffer.setActive(data);
       client.write(
         JSON.stringify({
           type: "DATA_ACTIVE",
@@ -140,7 +109,7 @@ async function getConnected() {
   function sendMidData() {
     getNetwork();
     getMidData().then((data) => {
-      buffer.buffer.setMid(data);
+      buffer.setMid(data);
       client.write(
         JSON.stringify({
           type: "DATA_MID",
@@ -159,7 +128,7 @@ async function getConnected() {
 
   function sendPassiveData() {
     getPassivedata().then((data) => {
-      buffer.buffer.setPassive(data);
+      buffer.setPassive(data);
       client.write(
         JSON.stringify({
           type: "DATA_PASSIVE",
@@ -201,7 +170,7 @@ async function getConnected() {
 
 getNetwork();
 Arp.getArp().then((data) => {
-  buffer.buffer.setArp(data);
+  buffer.setArp(data);
 });
 
 function onData(d) {
