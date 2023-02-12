@@ -6,8 +6,6 @@ const { getActiveData } = require("../activeData");
 const Arp = require("../devInf/getArp");
 const { getNetwork } = require("../devInf/floodPing");
 
-const { getNetwork } = require("./controller/devInf/floodPing");
-
 async function processMSG(d) {
   data = JSON.parse(d);
 

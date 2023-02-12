@@ -19,12 +19,12 @@ app.get("/", function (req, res) {
   let pData = buff.getPassive();
   let arpData = buff.getArp();
 
-  if (!UID || !aData || !mData || !pData || !arpData) {
-    console.log("here");
+  if (!UID || !aData || !mData || !pData) {
+    // console.log(mData);
     res.render("preparing");
   }
 
-  res.render("index", { UID, aData, mData, pData, arpData });
+  res.render("index", { UID, aData, mData, pData });
 });
 
 app.listen(57071, function () {

@@ -3,15 +3,9 @@ Known bugs
 app: on reconnect creates secondary connection, send data twice and increase in heap size 
 [review connections on disconnect, restart app on dual connection]
 
-app: create temp file for website requires privileged user
-[save it in temp folder]
+
 
 
 Improvements
 ========================================================================================
 
-
-Slow start if no temp file is created
-
-
-Get neighbours IP address list

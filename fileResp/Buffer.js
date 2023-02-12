@@ -16,7 +16,7 @@ function getUID() {
 }
 
 function setUID(data) {
-  this.UID = data;
+  UID = data;
 }
 
 function setActive(data) {

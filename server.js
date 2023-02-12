@@ -12,7 +12,12 @@ const Arp = require("./controller/devInf/getArp");
 
 const { processMSG } = require("./controller/func/processMessage");
 
-///////////=================================== WEB
+let active_Interval;
+let mid_Interval;
+let passive_Interval;
+
+///////////================ populated data to be used in WEB
+// dont send it as its not connected yet
 
 getActiveData().then((data) => buffer.setActive(data));
 getMidData().then((data) => buffer.setMid(data));
@@ -27,9 +32,8 @@ let client;
 let my_UID;
 module.exports = my_UID;
 let checkPassive_Interval = 1800000;
-let checkMid_Interval = 11000;
+let checkMid_Interval = 60000;
 let checkActive_Interval = 5000;
-
 let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
@@ -53,6 +57,10 @@ getNetwork(); //  check neighbords by ping "broadcast"
 
 getConnected();
 async function getConnected() {
+  checkPassive_Interval = 1800000;
+  checkMid_Interval = 60000;
+  checkActive_Interval = 5000;
+
   client = null;
   client = tls.connect(options, async () => {
     // get machine ID to inform server who are connecting to
@@ -79,7 +87,11 @@ async function getConnected() {
 function onERORR(e) {
   console.log(e);
   let t;
+
   clearTimeout(t);
+  clearInterval(active_Interval);
+  clearInterval(mid_Interval);
+  clearInterval(passive_Interval);
   if (e.code == "ECONNRESET") {
     console.log("Disconnected from a server");
   } else if (e.code == "ECONNREFUSED") {
@@ -96,9 +108,9 @@ function onERORR(e) {
 //====================== Send Data ===========================
 
 function sendData() {
-  setInterval(sendActiveData, checkActive_Interval);
-  setInterval(sendMidData, checkMid_Interval);
-  setInterval(sendPassiveData, checkPassive_Interval);
+  active_Interval = setInterval(sendActiveData, checkActive_Interval);
+  mid_Interval = setInterval(sendMidData, checkMid_Interval);
+  passive_Interval = setInterval(sendPassiveData, checkPassive_Interval);
 }
 
 function sendActiveData() {
