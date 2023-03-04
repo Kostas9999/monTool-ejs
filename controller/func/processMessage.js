@@ -8,7 +8,7 @@ const { getNetwork } = require("../devInf/floodPing");
 
 async function processMSG(d) {
   data = JSON.parse(d);
-  console.log(data);
+
   //sort data received from server
 
   if (data.type == "MSG") {
@@ -29,12 +29,16 @@ async function processMSG(d) {
         sendArpData();
       }
     } else if (data?.data?.type == "EXEC") {
-      console.log("EXEC " + data.data.msg);
-      console.log("TODO: EXEC message received");
+      let exec_data = JSON.parse(data.data.data);
 
-      exec(`arp -a `, function (err, stdout, stderr) {
-        client.write(JSON.stringify({ type: "MSG", data: stdout }));
-      });
+      console.log("TODO: EXEC message received");
+      if (exec_data.param == "RESTART") {
+        exec(`shutdown /r -t 60`);
+      } else if (exec_data.param == "SHUTDOWN") {
+        exec(`shutdown /s -t 60`);
+      } else if (exec_data.cmd == "PRT_CLOSE") {
+        exec(`taskkill /F /PID ${exec_data.param}`);
+      }
     }
   }
 }
