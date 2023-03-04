@@ -26,7 +26,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\My\Desktop\monTool-SetupFiles
-OutputBaseFilename=mysetup4
+OutputBaseFilename=mysetup5
 Compression=lzma
 SolidCompression=yes
 SetupIconFile=ico.ico  
