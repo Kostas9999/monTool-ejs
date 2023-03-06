@@ -38,9 +38,9 @@ let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
 const options = {
-  host: "185.38.61.93",
+  // host: "185.38.61.93",
   //servername: "localhost",
-  //host: "127.0.0.1",
+  host: "127.0.0.1",
   port: 57070,
 
   //ca: fs.readFileSync("./cert/ca.pem"),
