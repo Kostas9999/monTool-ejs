@@ -1,4 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+
 
 const si = require("systeminformation");
 const { exec, spawn, execSync } = require("node:child_process");

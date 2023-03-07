@@ -31,7 +31,7 @@ async function processMSG(d) {
     } else if (data?.data?.type == "EXEC") {
       let exec_data = JSON.parse(data.data.data);
 
-      console.log("TODO: EXEC message received");
+      console.log("EXEC message received: "+exec_data.param);
       if (exec_data.param == "RESTART") {
         exec(`shutdown /r -t 60`);
       } else if (exec_data.param == "SHUTDOWN") {

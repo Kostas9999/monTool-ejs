@@ -18,8 +18,8 @@ async function getNetwork() {
       network.IPv4.lastIndexOf(".") + 1
     );
 
-    for (let i = 1; i < 255; i++) {
-      exec(`ping ${networkPart}.${i} -w 1 -n 1`);
+    for (let i = 1; i < 20; i++) {
+    //  exec(`ping ${networkPart}.${i} -w 1 -n 1`);
     }
   });
 }
