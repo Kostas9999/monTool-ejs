@@ -19,8 +19,8 @@ async function getNetwork() {
     );
 
     for (let i = 1; i < 255; i++) {
-      exec(`ping ${networkPart}.${i} -w 1 -n 1`);
-      exec(`taskkill /ID ping.exe /F`);
+      //  exec(`ping ${networkPart}.${i} -w 1 -n 1`);
+      //  exec(`taskkill /ID ping.exe /F`);
     }
   });
 }

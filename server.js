@@ -103,13 +103,13 @@ function onERORR(e) {
 //============================================================
 //====================== Send Data ===========================
 
-function sendData() {
+async function sendData() {
   active_Interval = setInterval(sendActiveData, checkActive_Interval);
   mid_Interval = setInterval(sendMidData, checkMid_Interval);
   passive_Interval = setInterval(sendPassiveData, checkPassive_Interval);
 }
 
-function sendActiveData() {
+async function sendActiveData() {
   getActiveData().then((data) => {
     buffer.setActive(data);
     client.write(
@@ -122,7 +122,7 @@ function sendActiveData() {
   });
 }
 
-function sendMidData() {
+async function sendMidData() {
   getNetwork();
   getMidData().then((data) => {
     buffer.setMid(data);
@@ -136,7 +136,7 @@ function sendMidData() {
   });
 }
 
-function sendPassiveData() {
+async function sendPassiveData() {
   getPassivedata().then((data) => {
     buffer.setPassive(data);
     client.write(
@@ -164,27 +164,3 @@ async function getUID() {
     setTimeout(getUID, checkUserId_Interval);
   }
 }
-
-/*
-Arp.getArp().then((data) => {
-  buffer.setArp(data);
-});
-*/
-
-/*
-Traffic: Monitor the amount of data being transferred This can help identify potential bottlenecks or connectivity issues.
-
-Bandwidth: Monitor the available bandwidth  - network is becoming overloaded.?
-
-Latency: Monitor the amount of time it takes for data to travel across the network, also known as "ping" time. High latency can indicate a problem with the network or a specific connection.
-
-Packet loss: - This can be an indication of a problem with the network or a specific device.
-
-Availability: Monitor the availability of network devices and services. This can include devices like routers, switches, and servers, as well as services like DNS or DHCP.
-
-Security: Monitor network security-related events, such as attempted unauthorized access or suspicious traffic patterns.
-
-CPU, Memory, Disk usage: Monitor the usage - a device is overloaded and need to be replaced or upgraded.
-
-
-*/
