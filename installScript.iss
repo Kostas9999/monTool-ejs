@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "monTool"
-#define MyAppVersion "0.1.1"
+#define MyAppVersion "0.2.1"
 #define MyAppPublisher "B00148740"
 #define MyAppURL "monTool.vercel.app"
 #define NSSM "/nssm/win32/nssm.exe"

@@ -1,6 +1,5 @@
 const { exec } = require("child_process");
 
-const { getPassivedata } = require("../passiveData");
 const { getMidData } = require("../midData");
 const { getActiveData } = require("../activeData");
 const Arp = require("../devInf/getArp");
@@ -9,11 +8,9 @@ const { getNetwork } = require("../devInf/floodPing");
 async function processMSG(d) {
   data = JSON.parse(d);
 
-  //sort data received from server
-
   if (data.type == "MSG") {
-    console.log(data.data);
   } else if (data?.type == "POSTBOX") {
+    console.log(data);
     if (data?.data?.type == "GET") {
       console.log("GET " + data?.data?.msg);
       if (data?.data?.msg == "ACTIVE_DATA") {
@@ -28,24 +25,20 @@ async function processMSG(d) {
       if (data?.data?.msg == "ARP_DATA") {
         sendArpData();
       }
-    } else if (data?.data?.type == "EXEC") {
-      let exec_data = JSON.parse(data.data.data);
-
-      console.log("EXEC message received: "+exec_data.param);
-      if (exec_data.param == "RESTART") {
-        exec(`shutdown /r -t 60`);
-      } else if (exec_data.param == "SHUTDOWN") {
-        exec(`shutdown /s -t 60`);
-      } else if (exec_data.cmd == "PRT_CLOSE") {
-        exec(`taskkill /F /PID ${exec_data.param}`);
-      }
+    } else if (data?.data?.cmd == "PRT_CLOSE") {
+      exec(`taskkill /F /PID ${data.data.param}`);
+    } else if (data?.data?.param == "RESTART") {
+      exec(`shutdown /r -t 60`);
+    } else if (data?.data?.param == "SHUTDOWN") {
+      exec(`shutdown /s -t 60`);
+    } else if (data?.data?.param == "CANCEL_SHUTDOWN") {
+      exec(`shutdown -a`);
     }
   }
 }
 
 function sendActiveData() {
   getActiveData().then((data) => {
-    buffer.setActive(data);
     client.write(
       JSON.stringify({
         type: "DATA_ACTIVE",
@@ -56,10 +49,9 @@ function sendActiveData() {
   });
 }
 
-function sendMidData() {
+async function sendMidData() {
   getNetwork();
   getMidData().then((data) => {
-    buffer.setMid(data);
     client.write(
       JSON.stringify({
         type: "DATA_MID",
@@ -72,7 +64,6 @@ function sendMidData() {
 
 function sendPassiveData() {
   getPassivedata().then((data) => {
-    buffer.setPassive(data);
     client.write(
       JSON.stringify({
         type: "DATA_PASSIVE",

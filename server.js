@@ -37,18 +37,22 @@ let checkActive_Interval = 5000;
 let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
-const options = {
-  // host: "185.38.61.93",
-  //servername: "localhost",
-  host: "127.0.0.1",
-  port: 57070,
+let options = [];
+let attempt = 0;
 
-  //ca: fs.readFileSync("./cert/ca.pem"),
-  key: fs.readFileSync("./cert/key.pem"),
-  cert: fs.readFileSync("./cert/cert.pem"),
-  passphrase: "MGproject",
-  rejectUnauthorized: false,
-};
+if (options.length == 0) {
+  options[0] = {
+    //host: "185.38.61.93",
+
+    host: "127.0.0.1",
+    port: 57070,
+
+    key: fs.readFileSync("./cert/key.pem"),
+    cert: fs.readFileSync("./cert/cert.pem"),
+    passphrase: "MGproject",
+    rejectUnauthorized: false,
+  };
+}
 
 // ===========================  connection settings end
 
@@ -57,9 +61,14 @@ getNetwork(); //  check neighbords by ping "broadcast"
 
 getConnected();
 async function getConnected() {
+  // get machine ID to inform server who are connecting to
+  console.log(
+    `connecting to ${options[attempt % options.length].host}:${
+      options[attempt % options.length].port
+    }`
+  );
   client = null;
-  client = tls.connect(options, async () => {
-    // get machine ID to inform server who are connecting to
+  client = tls.connect(options[attempt % options.length], async () => {
     await getUID();
     buffer.setUID(my_UID);
 
@@ -68,12 +77,13 @@ async function getConnected() {
     client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
   }); //=============== end of tls.connect
 
-  client.on("data", (data) => {
+  client.on("data", async (data) => {
     processMSG(data);
   });
 
   client.on("error", (e) => {
     onERORR(e);
+    attempt++;
   });
 }
 
@@ -110,6 +120,11 @@ async function sendData() {
 }
 
 async function sendActiveData() {
+  console.log(
+    `using  ${options[attempt % options.length].host}:${
+      options[attempt % options.length].port
+    }`
+  );
   getActiveData().then((data) => {
     buffer.setActive(data);
     client.write(
@@ -163,4 +178,25 @@ async function getUID() {
   } else {
     setTimeout(getUID, checkUserId_Interval);
   }
+}
+getOptions();
+async function getOptions() {
+  const res = await fetch(
+    "https://montool.vercel.app/api/serverList?passkey=groupproject"
+  );
+  const getSrv = (await res.json()).serverList;
+
+  getSrv.forEach((element) => {
+    options.push({
+      // host: "185.38.61.93",
+
+      host: element.ip,
+      port: element.port,
+
+      key: fs.readFileSync("./cert/key.pem"),
+      cert: fs.readFileSync("./cert/cert.pem"),
+      passphrase: "MGproject",
+      rejectUnauthorized: false,
+    });
+  });
 }
