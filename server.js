@@ -27,7 +27,7 @@ getPassivedata().then((data) => buffer.setPassive(data));
 
 dotenv.config({ path: "./config/config.env" });
 
-let client;
+let client, server;
 
 let my_UID;
 module.exports = my_UID;
@@ -42,9 +42,9 @@ let attempt = 0;
 
 if (options.length == 0) {
   options[0] = {
-    //host: "185.38.61.93",
+    host: "185.38.61.93",
 
-    host: "127.0.0.1",
+    //host: "127.0.0.1",
     port: 57070,
 
     key: fs.readFileSync("./cert/key.pem"),
@@ -69,6 +69,10 @@ async function getConnected() {
   );
   client = null;
   client = tls.connect(options[attempt % options.length], async () => {
+    server = {
+      ip: options[attempt % options.length].host,
+      port: options[attempt % options.length].port,
+    };
     await getUID();
     buffer.setUID(my_UID);
 
@@ -120,11 +124,6 @@ async function sendData() {
 }
 
 async function sendActiveData() {
-  console.log(
-    `using  ${options[attempt % options.length].host}:${
-      options[attempt % options.length].port
-    }`
-  );
   getActiveData().then((data) => {
     buffer.setActive(data);
     client.write(
@@ -153,6 +152,7 @@ async function sendMidData() {
 
 async function sendPassiveData() {
   getPassivedata().then((data) => {
+    data.server = server;
     buffer.setPassive(data);
     client.write(
       JSON.stringify({
