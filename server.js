@@ -188,8 +188,6 @@ async function getOptions() {
 
   getSrv.forEach((element) => {
     options.push({
-      // host: "185.38.61.93",
-
       host: element.ip,
       port: element.port,
 

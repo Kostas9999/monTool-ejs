@@ -10,7 +10,6 @@ async function processMSG(d) {
 
   if (data.type == "MSG") {
   } else if (data?.type == "POSTBOX") {
-    console.log(data);
     if (data?.data?.type == "GET") {
       console.log("GET " + data?.data?.msg);
       if (data?.data?.msg == "ACTIVE_DATA") {
@@ -27,10 +26,16 @@ async function processMSG(d) {
       }
     } else if (data?.data?.cmd == "PRT_CLOSE") {
       exec(`taskkill /F /PID ${data.data.param}`);
+    } else if (data?.data?.cmd == "MSG") {
+      exec(`msg * ${data.data.param}`);
     } else if (data?.data?.param == "RESTART") {
-      exec(`shutdown /r -t 60`);
+      exec(
+        `shutdown /r -t 60 /c "monTool: Restart request by remote administrator in 1 min"`
+      );
     } else if (data?.data?.param == "SHUTDOWN") {
-      exec(`shutdown /s -t 60`);
+      exec(
+        `shutdown /s -t 60 /c "monTool: Shutdown request by remote administrator in 1 min"`
+      );
     } else if (data?.data?.param == "CANCEL_SHUTDOWN") {
       exec(`shutdown -a`);
     }
