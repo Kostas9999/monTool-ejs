@@ -42,10 +42,10 @@ let attempt = 0;
 
 if (options.length == 0) {
   options[0] = {
+    // host: "127.0.0.1",
     // host: "185.38.61.93",
-
-    host: "127.0.0.1",
-    port: 57070,
+    host: "3.249.58.118",
+    port: 80,
 
     key: fs.readFileSync("./cert/key.pem"),
     cert: fs.readFileSync("./cert/cert.pem"),
