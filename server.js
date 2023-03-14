@@ -32,8 +32,8 @@ let client, server;
 let my_UID;
 module.exports = my_UID;
 let checkPassive_Interval = 1800000;
-let checkMid_Interval = 6000;
-let checkActive_Interval = 5000;
+let checkMid_Interval = 13000;
+let checkActive_Interval = 10000;
 let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
