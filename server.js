@@ -2,6 +2,8 @@ const tls = require("tls");
 const fs = require("fs");
 const dotenv = require("dotenv");
 
+const checksum = require("checksum");
+
 const { getPassivedata } = require("./controller/passiveData");
 const { getMidData } = require("./controller/midData");
 const { getActiveData } = require("./controller/activeData");
@@ -42,10 +44,10 @@ let attempt = 0;
 
 if (options.length == 0) {
   options[0] = {
-    // host: "127.0.0.1",
-    // host: "185.38.61.93",
-    host: "3.249.58.118",
-    port: 80,
+    host: "127.0.0.1",
+    //  host: "185.38.61.93",
+    //  host: "3.249.58.118",
+    port: 443,
 
     key: fs.readFileSync("./cert/key.pem"),
     cert: fs.readFileSync("./cert/cert.pem"),
@@ -78,7 +80,15 @@ async function getConnected() {
 
     // set encoding and send hello message on succesfull connection
     client.setEncoding("utf8");
-    client.write(JSON.stringify({ type: "HELLO", UID: my_UID, data: my_UID }));
+    let chksum = checksum(JSON.stringify(my_UID));
+    client.write(
+      JSON.stringify({
+        type: "HELLO",
+        UID: my_UID,
+        data: my_UID,
+        trailer: { checksum: chksum },
+      })
+    );
   }); //=============== end of tls.connect
 
   client.on("data", async (data) => {
@@ -125,12 +135,15 @@ async function sendData() {
 
 async function sendActiveData() {
   getActiveData().then((data) => {
+    let chksum = checksum(JSON.stringify(data));
+
     buffer.setActive(data);
     client.write(
       JSON.stringify({
         type: "DATA_ACTIVE",
         UID: my_UID,
         data: data,
+        trailer: { checksum: chksum },
       })
     );
   });
@@ -139,12 +152,14 @@ async function sendActiveData() {
 async function sendMidData() {
   getNetwork();
   getMidData().then((data) => {
+    let chksum = checksum(JSON.stringify(data));
     buffer.setMid(data);
     client.write(
       JSON.stringify({
         type: "DATA_MID",
         UID: my_UID,
         data: data,
+        trailer: { checksum: chksum },
       })
     );
   });
@@ -153,12 +168,14 @@ async function sendMidData() {
 async function sendPassiveData() {
   getPassivedata().then((data) => {
     data.server = server;
+    let chksum = checksum(JSON.stringify(data));
     buffer.setPassive(data);
     client.write(
       JSON.stringify({
         type: "DATA_PASSIVE",
         UID: my_UID,
         data: data,
+        trailer: { checksum: chksum },
       })
     );
   });
