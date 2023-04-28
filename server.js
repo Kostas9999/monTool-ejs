@@ -18,8 +18,7 @@ let active_Interval;
 let mid_Interval;
 let passive_Interval;
 
-///////////================ populated data to be used in WEB
-// dont send it as its not connected yet
+// Data stored in a buffer to be used in WEB
 
 getActiveData().then((data) => buffer.setActive(data));
 getMidData().then((data) => buffer.setMid(data));
@@ -27,43 +26,51 @@ getPassivedata().then((data) => buffer.setPassive(data));
 
 ///////////===========================================
 
+// get environment variables
 dotenv.config({ path: "./config/config.env" });
 
 let client, server;
 
 let my_UID;
 module.exports = my_UID;
-let checkPassive_Interval = 1800000;
+
+// setting intervals for for collecting data
+
+let checkPassive_Interval = 3600000;
 let checkMid_Interval = 13000;
 let checkActive_Interval = 10000;
 let checkUserId_Interval = 10000;
 
 // ===========================================  connection settings
-let options = [];
-let attempt = 0;
+let options = []; // to keep array of awailable servers that is provided by an API
+let attempt = 0; // count attempt to connect to be used as index in array for available servers
 
 if (options.length == 0) {
   options[0] = {
     host: "127.0.0.1",
-    //  host: "185.38.61.93",
-    //  host: "3.249.58.118",
-    port: 443,
+    //  host: "185.38.61.93", // homehosting
+    //  host: "3.249.58.118", // Amazon
 
+    port: 443, // default port, using 443 to bypass public network restriction
+
+    // certification for connection
     key: fs.readFileSync("./cert/key.pem"),
     cert: fs.readFileSync("./cert/cert.pem"),
     passphrase: "MGproject",
+
+    // drop connection for unouthorized users (no inbound connection expected, might be removed)
     rejectUnauthorized: false,
   };
 }
 
 // ===========================  connection settings end
 
-//============================================== get connected to a server
-getNetwork(); //  check neighbords by ping "broadcast"
+//======================================================================== get connected to a server
+getNetwork(); //  check neighbords by ping "broadcast" (suspended "high cpu usage")
 
+// start connection
 getConnected();
 async function getConnected() {
-  // get machine ID to inform server who are connecting to
   console.log(
     `connecting to ${options[attempt % options.length].host}:${
       options[attempt % options.length].port
@@ -75,6 +82,8 @@ async function getConnected() {
       ip: options[attempt % options.length].host,
       port: options[attempt % options.length].port,
     };
+
+    // get machine ID to inform server who are connecting to
     await getUID();
     buffer.setUID(my_UID);
 
@@ -86,7 +95,7 @@ async function getConnected() {
         type: "HELLO",
         UID: my_UID,
         data: my_UID,
-        trailer: { checksum: chksum },
+        trailer: { CHECKSUM: chksum },
       })
     );
   }); //=============== end of tls.connect
@@ -143,7 +152,7 @@ async function sendActiveData() {
         type: "DATA_ACTIVE",
         UID: my_UID,
         data: data,
-        trailer: { checksum: chksum },
+        trailer: { CHECKSUM: chksum },
       })
     );
   });
@@ -159,7 +168,7 @@ async function sendMidData() {
         type: "DATA_MID",
         UID: my_UID,
         data: data,
-        trailer: { checksum: chksum },
+        trailer: { CHECKSUM: chksum },
       })
     );
   });
@@ -175,7 +184,7 @@ async function sendPassiveData() {
         type: "DATA_PASSIVE",
         UID: my_UID,
         data: data,
-        trailer: { checksum: chksum },
+        trailer: { CHECKSUM: chksum },
       })
     );
   });

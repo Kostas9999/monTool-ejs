@@ -9,7 +9,7 @@ async function processMSG(d) {
   data = JSON.parse(d);
 
   if (data.type == "MSG") {
-  } else if (data?.type == "POSTBOX") {
+  } else if (data?.type == "EXEC") {
     if (data?.data?.type == "GET") {
       console.log("GET " + data?.data?.msg);
       if (data?.data?.msg == "ACTIVE_DATA") {
