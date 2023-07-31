@@ -48,10 +48,10 @@ let attempt = 0; // count attempt to connect to be used as index in array for av
 if (options.length == 0) {
   options[0] = {
     host: "127.0.0.1",
-    //  host: "185.38.61.93", // homehosting
+    //host: "185.38.61.93", // homehosting
     //  host: "3.249.58.118", // Amazon
 
-    port: 443, // default port, using 443 to bypass public network restriction
+    port: 57070, // default port, using 443 to bypass public network restriction
 
     // certification for connection
     key: fs.readFileSync("./cert/key.pem"),
@@ -101,7 +101,8 @@ async function getConnected() {
   }); //=============== end of tls.connect
 
   client.on("data", async (data) => {
-    processMSG(data);
+    console.log(data);
+    //processMSG(data);
   });
 
   client.on("error", (e) => {
@@ -145,7 +146,7 @@ async function sendData() {
 async function sendActiveData() {
   getActiveData().then((data) => {
     let chksum = checksum(JSON.stringify(data));
-
+    console.log("active sent");
     buffer.setActive(data);
     client.write(
       JSON.stringify({
